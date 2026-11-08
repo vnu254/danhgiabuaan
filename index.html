@@ -1,0 +1,784 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#4B5320">
+<title>Đánh giá chất lượng bữa ăn</title>
+<style>
+:root{
+  --orange:#4B5320; --orange-l:#6B7B3A; --amber:#C9A227;
+  --green:#3E7A3A; --red:#e03131; --ink:#2B2B1F; --muted:#6E7159;
+  --line:#DCE0CB; --bg:#F5F6EC; --card:#fff; --r:16px;
+  --shadow:0 6px 22px rgba(60,70,20,.10);
+}
+[data-theme="dark"] {
+  --orange:#8ba656; --orange-l:#6B7B3A; --ink:#E8E8E0; --muted:#9A9E86;
+  --line:#3A3E2B; --bg:#12140D; --card:#1E2115; --shadow:0 6px 22px rgba(0,0,0,.4);
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html{-webkit-text-size-adjust:100%}
+body{margin:0; font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif; color:var(--ink); background:var(--bg); background-image: radial-gradient(900px 380px at 50% -120px,var(--bg) 0%,transparent 70%); background-attachment:fixed; min-height:100vh; padding-bottom:calc(120px + env(safe-area-inset-bottom)); -webkit-overflow-scrolling: touch; transition: background 0.3s, color 0.3s;}
+body.no-scroll { overflow: hidden; height: 100vh; position: fixed; width: 100%; touch-action: none; }
+
+.app{width:100%;max-width:560px;margin:0 auto;padding:10px 14px 20px}
+.hero{text-align:center;padding:14px 8px 16px;position:relative}
+.plate{width:74px;height:74px;margin:0 auto 10px;border-radius:50%; display:grid;place-items:center;font-size:34px; background:linear-gradient(145deg,var(--card),var(--line)); box-shadow:0 8px 20px rgba(0,0,0,.1), inset 0 0 0 6px var(--card), inset 0 0 0 8px var(--line);}
+.hero h1{margin:0 0 6px;font-size:1.3rem;font-weight:800;letter-spacing:-.3px}
+.hero p{margin:0;color:var(--muted);font-size:.85rem;line-height:1.45}
+.clock{display:inline-flex;align-items:center;gap:6px;margin-top:12px; padding:7px 15px;border-radius:999px; background:var(--card);border:1px solid var(--line); font-size:.78rem;font-weight:800;color:var(--orange); box-shadow:var(--shadow);font-variant-numeric:tabular-nums;}
+
+#themeToggle { position: absolute; top: 10px; right: 10px; width: 36px; height: 36px; border-radius: 50%; background: var(--card); border: 1px solid var(--line); font-size: 18px; display: grid; place-items: center; cursor: pointer; z-index: 10; color: var(--ink); }
+
+.card{ background:var(--card);border-radius:var(--r);box-shadow:var(--shadow); padding:15px;margin-bottom:12px;border:1px solid var(--line); }
+.sec{display:flex;align-items:center;gap:8px;margin-bottom:12px;font-size:.92rem;font-weight:800}
+.sec .n{ width:22px;height:22px;flex:0 0 22px;border-radius:50%; display:grid;place-items:center;font-size:.7rem;color:#fff; background:linear-gradient(135deg,var(--orange-l),var(--orange)); }
+
+.chips{display:flex;flex-wrap:wrap;gap:10px;justify-content:center}
+.chip{flex:1;min-width:85px;display:flex;flex-direction:column;align-items:center; justify-content:center;gap:6px;padding:12px 6px; border:1.5px solid var(--line);border-radius:13px;background:var(--card); font-size:.78rem;font-weight:700;color:var(--muted); cursor:pointer; transition:all .2s ease;user-select:none;text-align:center;}
+.chip .e{font-size:24px;line-height:1}
+.chip.active{ border-color:var(--orange);background:rgba(107,123,58,0.15);color:var(--orange); box-shadow:0 0 0 3px rgba(75,83,32,.10); }
+
+.stars{display:flex;gap:2px}
+.star{ flex:1;display:grid;place-items:center;padding:6px 0;border:0;background:transparent; font-size:34px;line-height:1;color:var(--line);cursor:pointer; transition:transform .15s,color .15s; }
+.star:active{transform:scale(.85)}
+.star.on{color:var(--amber);filter:drop-shadow(0 4px 8px rgba(201,162,39,.35))}
+.rate-note{ margin-top:8px;text-align:center;font-size:.88rem;font-weight:800; color:var(--muted);min-height:22px;transition:color .2s; }
+
+.field{position:relative}
+select{appearance:none;-webkit-appearance:none;width:100%; padding:14px 44px 14px 14px;font-size:16px;font-weight:700;font-family:inherit; color:var(--ink);background:var(--card);border:1.5px solid var(--line); border-radius:12px;cursor:pointer;}
+.field::after{ content:"";position:absolute;right:17px;top:50%;width:9px;height:9px; border-right:2px solid var(--muted);border-bottom:2px solid var(--muted); transform:translateY(-70%) rotate(45deg);pointer-events:none; }
+
+.tag-container { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+.tag { padding: 6px 12px; border-radius: 20px; background: var(--bg); border: 1px solid var(--line); font-size: 0.8rem; font-weight: 600; color: var(--muted); cursor: pointer; transition: 0.15s; }
+.tag.active { background: var(--orange); color: #fff; border-color: var(--orange); }
+
+textarea{width:100%;min-height:106px;padding:12px 14px;font-family:inherit; font-size:16px;line-height:1.55;color:var(--ink); border:1.5px solid var(--line);border-radius:12px;background:var(--card);resize:vertical;}
+textarea:focus{outline:none;border-color:var(--orange);}
+.counter{text-align:right;font-size:.72rem;color:var(--muted);margin-top:6px}
+
+.upload{ display:flex;align-items:center;justify-content:center;gap:12px; padding:20px 14px;border:2px dashed var(--line);border-radius:13px;background:var(--bg); cursor:pointer;transition:.2s; }
+.upload:active{background:var(--line);border-color:var(--orange)}
+.preview-grid{ display:grid; grid-template-columns:repeat(auto-fill,minmax(95px,1fr)); gap:8px; margin-top:12px; }
+.preview-item{ position:relative;aspect-ratio:1;border-radius:11px;overflow:hidden; background:var(--line); }
+.preview-item img{width:100%;height:100%;object-fit:cover;display:block}
+.preview-item .del{ position:absolute;top:4px;right:4px;width:26px;height:26px;border-radius:50%; border:0;background:rgba(0,0,0,.68);color:#fff;font-size:13px;cursor:pointer; display:grid;place-items:center; }
+.photo-count{ font-size:.78rem;color:var(--orange);margin-top:10px; text-align:center;font-weight:700;min-height:18px; }
+
+.submit-bar{ position:fixed;left:0;right:0;bottom:0;z-index:60; padding:10px 14px calc(10px + env(safe-area-inset-bottom)); background:linear-gradient(to top,var(--bg) 55%,transparent 100%); backdrop-filter:blur(8px); }
+.submit-bar .inner{max-width:560px;margin:0 auto}
+.btn{ width:100%;padding:16px;border:0;border-radius:14px;font-family:inherit; font-size:1.02rem;font-weight:800;color:#fff;cursor:pointer; background:linear-gradient(135deg,#6B7B3A,var(--orange)); box-shadow:0 10px 22px rgba(0,0,0,.2); transition:0.2s; }
+.btn:disabled{opacity:.65;cursor:not-allowed;box-shadow:none}
+
+.receipt{ margin:2px 0 12px;padding:16px;border-radius:var(--r); background:var(--card); border:1.5px dashed var(--green); }
+.receipt h3{margin:0 0 10px;font-size:.95rem;color:var(--green);}
+.row{ display:flex;justify-content:space-between;gap:14px; padding:8px 0;font-size:.85rem;border-bottom:1px dashed var(--line); }
+.row:last-child{border-bottom:0}
+.row span{color:var(--muted);}
+
+.toast{ position:fixed;left:50%;top:16px;transform:translate(-50%,-24px); max-width:calc(100% - 32px);padding:13px 18px;border-radius:14px; background:var(--green);color:#fff;font-size:.9rem;font-weight:700;text-align:center; box-shadow:0 10px 26px rgba(0,0,0,.2);opacity:0;visibility:hidden;z-index:600; transition:0.3s; }
+.toast.show{opacity:1;visibility:visible;transform:translate(-50%,0)}
+.toast.error{background:var(--red)}
+
+#adminTrigger { position: fixed; right: 12px; bottom: 90px; width: 44px; height: 44px; border-radius: 50%; background: var(--card); border: 1px solid var(--line); color: var(--muted); font-size: 20px; display: grid; place-items: center; cursor: pointer; opacity: 0.3; z-index: 50; }
+.modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); display: flex; align-items: center; justify-content: center; z-index: 300; opacity: 0; visibility: hidden; transition: 0.2s; padding: 16px; }
+.modal-overlay.show { opacity: 1; visibility: visible; }
+.modal-box { background: var(--card); width: 100%; max-width: 360px; border-radius: 16px; padding: 20px; position: relative; transform: translateY(20px); transition: 0.2s; color: var(--ink); }
+.modal-overlay.show .modal-box { transform: translateY(0); }
+.modal-close { position: absolute; top: 12px; right: 12px; background: transparent; border: none; font-size: 20px; color: var(--muted); cursor: pointer; }
+.admin-input { width:100%;padding:14px;font-size:16px; border:1.5px solid var(--line);border-radius:10px;background:var(--bg);margin-bottom:15px; color:var(--ink); }
+.btn-admin { width: 100%; padding: 14px; border: 0; border-radius: 10px; background: #1c7ed6; color: #fff; font-weight: 800; font-size: 1rem; cursor: pointer; transition: 0.2s;}
+.btn-admin:active { transform: scale(0.98); }
+
+.preview-overlay { position: fixed; top: 0; left: 0; right: 0; height: 100vh; height: 100dvh; z-index: 400; background: var(--bg); display: none; flex-direction: column; }
+.preview-overlay.show { display: flex; }
+
+.preview-header { display: flex; flex-direction: column; background: var(--card); border-bottom: 1px solid var(--line); padding-top: env(safe-area-inset-top); }
+.preview-header-top { display: flex; align-items: center; justify-content: space-between; padding: 10px 16px; background: var(--orange); color: #fff; }
+.preview-close-btn { background: rgba(255,255,255,0.2); border: 0; color: #fff; padding: 8px 12px; border-radius: 8px; font-weight: 700; cursor: pointer; font-size: 0.9rem;}
+.preview-title { font-weight: 800; font-size: 1rem; text-align: center; flex: 1; }
+
+.preview-filters { display: flex; gap: 8px; padding: 10px 16px; flex-wrap: wrap; background: var(--bg); border-bottom: 1px solid var(--line); }
+.preview-filters input, .preview-filters select { flex: 1; min-width: 110px; padding: 8px 12px; border-radius: 8px; border: 1px solid var(--line); background: var(--card); color: var(--ink); font-size: 0.85rem; font-weight: 600; outline: none; }
+.preview-filters input:focus, .preview-filters select:focus { border-color: var(--orange); }
+.btn-filter-apply { padding: 8px 16px; background: var(--orange); color: white; border: none; border-radius: 8px; font-weight: 700; cursor: pointer; font-size: 0.85rem; white-space: nowrap;}
+
+.preview-iframe { flex: 1; width: 100%; border: 0; background: #fff; height: 100%; }
+
+.preview-bottom-bar { display: flex; gap: 8px; padding: 12px; background: var(--card); border-top: 1px solid var(--line); padding-bottom: calc(12px + env(safe-area-inset-bottom)); }
+.btn-preview-action { flex: 1; padding: 12px 5px; border: 0; border-radius: 10px; color: #fff; font-weight: 800; font-size: 0.85rem; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 4px; box-shadow: 0 4px 10px rgba(0,0,0,0.1);}
+.btn-preview-action:active { opacity: 0.8; transform: scale(0.98); }
+
+.thankyou-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); display: flex; align-items: center; justify-content: center; z-index: 9999; opacity: 0; visibility: hidden; transition: opacity 0.3s, visibility 0.3s; backdrop-filter: blur(4px); }
+.thankyou-overlay.show { opacity: 1; visibility: visible; }
+.thankyou-box { background: var(--card); padding: 30px 20px; border-radius: 20px; text-align: center; max-width: 280px; width: 85%; transform: scale(0.8); transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); box-shadow: 0 10px 40px rgba(0,0,0,0.3); border: 1px solid var(--line); }
+.thankyou-overlay.show .thankyou-box { transform: scale(1); }
+.thankyou-icon { font-size: 54px; margin-bottom: 12px; animation: popIcon 0.4s ease; }
+@keyframes popIcon { 0% { transform: scale(0); } 80% { transform: scale(1.2); } 100% { transform: scale(1); } }
+.thankyou-box h2 { margin: 0 0 8px; color: var(--green); font-size: 1.25rem; font-weight: 800; }
+.thankyou-box p { margin: 0; color: var(--muted); font-size: 0.9rem; line-height: 1.4; }
+</style>
+</head>
+<body>
+
+<div id="toast" class="toast"></div>
+
+<div class="app">
+  <div class="hero">
+    <button id="themeToggle" title="Bật/Tắt nền tối">🌙</button>
+    <div class="plate">🍽️</div>
+    <h1>Đánh giá chất lượng bữa ăn</h1>
+    <p>Phản hồi của bạn giúp nhà bếp phục vụ tốt hơn mỗi ngày</p>
+    <div class="clock">⏰ <span id="liveClock">--:--:--</span></div>
+  </div>
+
+  <form id="evalForm" novalidate>
+    <div class="card">
+      <div class="sec"><span class="n">1</span>Chọn bữa ăn đánh giá</div>
+      <div class="chips" id="mealChips">
+        <label class="chip active"><input type="radio" name="meal" value="Bữa sáng" checked hidden><span class="e">🌅</span><span>Bữa sáng</span></label>
+        <label class="chip"><input type="radio" name="meal" value="Bữa trưa" hidden><span class="e">☀️</span><span>Bữa trưa</span></label>
+        <label class="chip"><input type="radio" name="meal" value="Bữa tối" hidden><span class="e">🌙</span><span>Bữa tối</span></label>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="sec"><span class="n">2</span>Chất lượng bữa ăn</div>
+      <div class="stars" id="stars">
+        <button type="button" class="star" data-v="1">★</button><button type="button" class="star" data-v="2">★</button>
+        <button type="button" class="star" data-v="3">★</button><button type="button" class="star" data-v="4">★</button>
+        <button type="button" class="star" data-v="5">★</button>
+      </div>
+      <div class="rate-note" id="rateNote">Chạm vào sao để chấm điểm</div>
+    </div>
+
+    <div class="card">
+      <div class="sec"><span class="n">3</span>Gửi đến</div>
+      <div class="field"><select id="recipient"><option value="">— Bấm vào đây để chọn —</option></select></div>
+      <div class="hint" id="idHint" style="margin-top:9px;font-size:.75rem;color:var(--muted)">Bấm chọn để xác định mã người nhận</div>
+    </div>
+
+    <div class="card">
+      <div class="sec"><span class="n">4</span>Nội dung đánh giá</div>
+      <textarea id="messageText" maxlength="1000" placeholder="Nhập cảm nhận của bạn..."></textarea>
+      <div class="counter"><span id="charCount">0</span>/1000</div>
+      
+      <div class="tag-container" id="quickTags">
+        <div class="tag" data-tag="Mặn">Mặn</div>
+        <div class="tag" data-tag="Nhạt">Nhạt</div>
+        <div class="tag" data-tag="Nguội">Nguội</div>
+        <div class="tag" data-tag="Thiếu rau">Thiếu rau</div>
+        <div class="tag" data-tag="Cơm sống">Cơm sống</div>
+        <div class="tag" data-tag="Trình bày đẹp">Trình bày đẹp</div>
+        <div class="tag" data-tag="Phục vụ tốt">Phục vụ tốt</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="sec"><span class="n">5</span>Ảnh đính kèm <span style="color:var(--red);font-size:.78rem">(bắt buộc)</span></div>
+      <label class="upload" for="imageInput"><span class="ico">📷</span><span class="txt" id="uploadTxt">Chụp ảnh hoặc chọn</span></label>
+      <input type="file" id="imageInput" accept="image/*" multiple hidden>
+      <div class="preview-grid" id="previewGrid"></div>
+      <div class="photo-count" id="photoCount"></div>
+    </div>
+
+    <div class="receipt" id="receipt" hidden>
+      <h3 id="receiptTitle">✅ Đã gửi đánh giá!</h3>
+      <div class="row"><span>Người nhận</span><b id="rName">—</b></div>
+      <div class="row"><span>Thời gian</span><b id="rTime">—</b></div>
+      <div class="row"><span>Bữa ăn</span><b id="rMeal">—</b></div>
+      <div class="row"><span>Chất lượng</span><b id="rRate">—</b></div>
+      <div class="row"><span>Số ảnh</span><b id="rImages">—</b></div>
+      <div style="margin-top:12px;text-align:center;font-weight:700;color:var(--orange)" id="thankYouMsg"></div>
+    </div>
+
+    <div class="submit-bar"><div class="inner"><button class="btn" id="submitBtn" type="submit">📨 Gửi đánh giá</button></div></div>
+  </form>
+</div>
+
+<button id="adminTrigger" title="Quản trị">⚙️</button>
+
+<div class="modal-overlay" id="adminModal">
+  <div class="modal-box">
+    <button class="modal-close" id="closeAdminModal">✕</button>
+    <h3 style="margin:0 0 15px;color:var(--orange)">🔐 Quản trị viên</h3>
+    <p style="font-size: 0.85rem; color: var(--muted); margin-bottom: 15px;">Vui lòng nhập mật khẩu để truy cập hệ thống báo cáo.</p>
+    <input type="password" id="adminPwd" class="admin-input" placeholder="Nhập mật khẩu...">
+    <button type="button" id="adminPreviewBtn" class="btn-admin">👁️ Đăng nhập & Xem</button>
+  </div>
+</div>
+
+<div class="preview-overlay" id="previewOverlay">
+  <div class="preview-header">
+    <div class="preview-header-top">
+      <button class="preview-close-btn" id="closePreview">✕ Đóng</button>
+      <div class="preview-title" id="previewTitle">📊 Tổng hợp</div>
+      <div style="width: 60px;"></div> 
+    </div>
+    
+    <div class="preview-filters">
+      <input type="date" id="fromDate" title="Từ ngày">
+      <input type="date" id="toDate" title="Đến ngày">
+      <select id="filterMeal">
+        <option value="">Tất cả bữa</option>
+        <option value="Bữa sáng">Bữa sáng</option>
+        <option value="Bữa trưa">Bữa trưa</option>
+        <option value="Bữa tối">Bữa tối</option>
+      </select>
+      <select id="filterRating">
+        <option value="">Tất cả sao</option>
+        <option value="5">5 Sao</option>
+        <option value="4">4 Sao</option>
+        <option value="3">3 Sao</option>
+        <option value="2">2 Sao</option>
+        <option value="1">1 Sao</option>
+      </select>
+      <button class="btn-filter-apply" id="applyFilterBtn">🔍 Lọc</button>
+    </div>
+  </div>
+
+  <iframe id="previewFrame" class="preview-iframe" title="Báo cáo"></iframe>
+  
+  <div class="preview-bottom-bar">
+    <button class="btn-preview-action" id="downloadFromPreview" style="background: #4B5320;">📥 Tải HTML</button>
+    <button class="btn-preview-action" id="csvFromPreview" style="background: #2b8a3e;">📊 Tải CSV</button>
+    <button class="btn-preview-action" id="testZaloFromPreview" style="background: #f59f00;">🧪 Test Zalo</button>
+  </div>
+</div>
+
+<div class="thankyou-overlay" id="thankyouOverlay">
+  <div class="thankyou-box">
+    <div class="thankyou-icon">✅</div>
+    <h2>Gửi thành công!</h2>
+    <p id="thankyouText">Cảm ơn bạn đã đánh giá!</p>
+  </div>
+</div>
+
+<script>
+(function () {
+  'use strict';
+
+  const PROXY_URL = 'https://script.google.com/macros/s/AKfycbxjLu_ZVt0VwYvSQCqCqGSCDp8pNw2iPVDNzcdL1No5BFDrOpva9c1PFVz0jwQZMu26/exec';
+  
+  const RECIPIENTS = {
+    nhom: { name: 'Nhóm Góp ý bữa ăn', id: 'zgr-c1563bd7ffb816e64fa9' },
+    quanly: { name: 'Quản lý bếp', id: 'c91bf382bbcb52950bda' },
+  };
+  const RATE = {
+    1: { label: 'Rất kém', emoji: '😖', color: '#e03131' },
+    2: { label: 'Kém', emoji: '🙁', color: '#f03e3e' },
+    3: { label: 'Bình thường', emoji: '😐', color: '#C9A227' },
+    4: { label: 'Ngon', emoji: '😊', color: '#37b24d' },
+    5: { label: 'Xuất sắc', emoji: '🤩', color: '#3E7A3A' }
+  };
+  const MAX_IMAGES = 6;
+  const $ = id => document.getElementById(id);
+  const pad = n => String(n).padStart(2, '0');
+
+  function fmtTime(d) {
+    return pad(d.getHours()) + ':' + pad(d.getMinutes()) + ':' + pad(d.getSeconds()) + ' - ' + pad(d.getDate()) + '/' + pad(d.getMonth() + 1) + '/' + d.getFullYear();
+  }
+  function maskId(id) {
+    return !id ? '—' : (id.length <= 6 ? id : id.slice(0, 4) + '••••' + id.slice(-4));
+  }
+  function showToast(msg, isError) {
+    const t = $('toast');
+    t.textContent = msg;
+    t.classList.toggle('error', !!isError);
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 4000);
+  }
+
+  const themeToggle = $('themeToggle');
+  const currentTheme = localStorage.getItem('app_theme') || 'light';
+  document.body.setAttribute('data-theme', currentTheme);
+  themeToggle.textContent = currentTheme === 'dark' ? '☀️' : '🌙';
+  themeToggle.addEventListener('click', () => {
+    const isDark = document.body.getAttribute('data-theme') === 'dark';
+    const newTheme = isDark ? 'light' : 'dark';
+    document.body.setAttribute('data-theme', newTheme);
+    localStorage.setItem('app_theme', newTheme);
+    themeToggle.textContent = newTheme === 'dark' ? '☀️' : '🌙';
+  });
+
+  const liveClock = $('liveClock');
+  function tick() { liveClock.textContent = fmtTime(new Date()); }
+  tick(); setInterval(tick, 1000);
+
+  const chips = document.querySelectorAll('#mealChips .chip');
+  chips.forEach(chip => {
+    chip.addEventListener('click', () => {
+      chips.forEach(c => c.classList.remove('active'));
+      chip.classList.add('active');
+      chip.querySelector('input').checked = true;
+      saveDraft();
+    });
+  });
+
+  let rating = 0;
+  const starBtns = document.querySelectorAll('#stars .star');
+  const rateNote = $('rateNote');
+  starBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+      rating = Number(btn.dataset.v);
+      starBtns.forEach(b => b.classList.toggle('on', Number(b.dataset.v) <= rating));
+      rateNote.textContent = RATE[rating].emoji + ' ' + RATE[rating].label;
+      rateNote.style.color = RATE[rating].color;
+      saveDraft();
+    });
+  });
+
+  const selRecipient = $('recipient');
+  const idHint = $('idHint');
+  Object.keys(RECIPIENTS).forEach(key => {
+    const opt = document.createElement('option');
+    opt.value = key;
+    opt.textContent = RECIPIENTS[key].name;
+    selRecipient.appendChild(opt);
+  });
+  selRecipient.addEventListener('change', () => {
+    const r = RECIPIENTS[selRecipient.value];
+    idHint.innerHTML = r ? 'Mã người nhận: <b>' + maskId(r.id) + '</b>' : 'Bấm chọn để xác định mã người nhận';
+    saveDraft();
+  });
+
+  const messageText = $('messageText');
+  messageText.addEventListener('input', () => {
+    $('charCount').textContent = messageText.value.length;
+    saveDraft();
+  });
+
+  const selectedTags = new Set();
+  document.querySelectorAll('#quickTags .tag').forEach(tagEl => {
+    tagEl.addEventListener('click', () => {
+      tagEl.classList.toggle('active');
+      const tagVal = tagEl.dataset.tag;
+      if (tagEl.classList.contains('active')) selectedTags.add(tagVal);
+      else selectedTags.delete(tagVal);
+      saveDraft();
+    });
+  });
+
+  function saveDraft() {
+    const draft = {
+      meal: document.querySelector('input[name="meal"]:checked').value,
+      rating: rating,
+      recipient: selRecipient.value,
+      text: messageText.value,
+      tags: Array.from(selectedTags)
+    };
+    localStorage.setItem('eval_draft', JSON.stringify(draft));
+  }
+
+  function loadDraft() {
+    const draftStr = localStorage.getItem('eval_draft');
+    if (!draftStr) return;
+    try {
+      const draft = JSON.parse(draftStr);
+      if (draft.meal) {
+        chips.forEach(c => {
+          const isMatch = c.querySelector('input').value === draft.meal;
+          c.classList.toggle('active', isMatch);
+          if (isMatch) c.querySelector('input').checked = true;
+        });
+      }
+      if (draft.rating && RATE[draft.rating]) {
+        rating = draft.rating;
+        starBtns.forEach(b => b.classList.toggle('on', Number(b.dataset.v) <= rating));
+        rateNote.textContent = RATE[rating].emoji + ' ' + RATE[rating].label;
+        rateNote.style.color = RATE[rating].color;
+      }
+      if (draft.recipient) {
+        selRecipient.value = draft.recipient;
+        const r = RECIPIENTS[draft.recipient];
+        if (r) idHint.innerHTML = 'Mã người nhận: <b>' + maskId(r.id) + '</b>';
+      }
+      if (draft.text) {
+        messageText.value = draft.text;
+        $('charCount').textContent = draft.text.length;
+      }
+      if (draft.tags && draft.tags.length > 0) {
+        draft.tags.forEach(t => {
+          const el = document.querySelector(`.tag[data-tag="${t}"]`);
+          if (el) { el.classList.add('active'); selectedTags.add(t); }
+        });
+      }
+    } catch (e) {}
+  }
+  loadDraft();
+
+  const imageInput = $('imageInput');
+  const previewGrid = $('previewGrid');
+  const photoCount = $('photoCount');
+  const images = [];
+
+  function readFileAsDataURL(file) {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = ev => resolve(ev.target.result);
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
+  }
+
+  async function addFiles(fileList) {
+    const list = Array.from(fileList).filter(f => f.type && f.type.indexOf('image/') === 0);
+    const remaining = MAX_IMAGES - images.length;
+    if (list.length > remaining) {
+      showToast('Tối đa ' + MAX_IMAGES + ' ảnh', true);
+      list.length = remaining;
+    }
+    $('uploadTxt').textContent = '⏳ Đang xử lý...';
+    for (const file of list) {
+      const dataUrl = await readFileAsDataURL(file);
+      images.push({ file, dataUrl });
+    }
+    renderPreview();
+    $('uploadTxt').textContent = 'Chụp ảnh hoặc chọn';
+  }
+
+  function renderPreview() {
+    previewGrid.innerHTML = '';
+    images.forEach((img, idx) => {
+      const item = document.createElement('div');
+      item.className = 'preview-item';
+      const imageEl = document.createElement('img');
+      imageEl.src = img.dataUrl;
+      const delBtn = document.createElement('button');
+      delBtn.type = 'button';
+      delBtn.className = 'del';
+      delBtn.textContent = '✕';
+      delBtn.addEventListener('click', () => {
+        images.splice(idx, 1);
+        renderPreview();
+      });
+      item.appendChild(imageEl);
+      item.appendChild(delBtn);
+      previewGrid.appendChild(item);
+    });
+    photoCount.textContent = images.length > 0 ? '📸 Đã chọn ' + images.length + '/' + MAX_IMAGES : '';
+  }
+  imageInput.addEventListener('change', async e => {
+    if (e.target.files.length) {
+      await addFiles(e.target.files);
+      e.target.value = '';
+    }
+  });
+
+  function resizeImage(file, maxW=1000, maxH=1000) {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = ev => {
+        const img = new Image();
+        img.onload = () => {
+          let w = img.width, h = img.height;
+          if (w > h) { if (w > maxW) { h *= maxW / w; w = maxW; } }
+          else { if (h > maxH) { w *= maxH / h; h = maxH; } }
+          const canvas = document.createElement('canvas');
+          canvas.width = w;
+          canvas.height = h;
+          canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+          resolve(canvas.toDataURL('image/jpeg', 0.75));
+        };
+        img.onerror = reject;
+        img.src = ev.target.result;
+      };
+      reader.onerror = reject;
+    });
+  }
+
+  function getLocalDateKey() {
+    const d = new Date();
+    return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate());
+  }
+
+  function isSpam(meal) {
+    const key = `eval_done_${getLocalDateKey()}_${meal}`;
+    return localStorage.getItem(key) === '1';
+  }
+
+  function markDone(meal) {
+    const key = `eval_done_${getLocalDateKey()}_${meal}`;
+    localStorage.setItem(key, '1');
+  }
+
+  const form = $('evalForm');
+  const submitBtn = $('submitBtn');
+
+  form.addEventListener('submit', async function (e) {
+    e.preventDefault();
+    const rec = RECIPIENTS[selRecipient.value];
+    const rawText = messageText.value.trim();
+    const meal = document.querySelector('input[name="meal"]:checked').value;
+
+    if (!rec) { showToast('Chọn người nhận!', true); return; }
+    if (!rating) { showToast('Chấm điểm!', true); return; }
+    if (images.length === 0) { showToast('Chụp ít nhất 1 ảnh!', true); return; }
+    if (!rawText) { showToast('Nhập nội dung!', true); return; }
+    
+    if (isSpam(meal)) { showToast('⚠️ Bạn đã đánh giá ' + meal + ' hôm nay rồi!', true); return; }
+
+    submitBtn.disabled = true;
+    const resizedImages = [];
+    for (let i = 0; i < images.length; i++) {
+      submitBtn.textContent = '⏳ Xử lý ảnh ' + (i + 1) + '/' + images.length + '...';
+      try {
+        const b64 = await resizeImage(images[i].file);
+        if (b64) resizedImages.push(b64);
+      } catch (err) {}
+    }
+
+    submitBtn.textContent = '⏳ Đang gửi...';
+    const timeStr = fmtTime(new Date());
+    const rateInfo = '⭐'.repeat(rating) + ' (' + RATE[rating].label + ')';
+    
+    const tagStr = selectedTags.size > 0 ? `\n[Thẻ: ${Array.from(selectedTags).join(', ')}]` : '';
+    const rawComment = rawText + tagStr;
+    const fullText = '🍽️ ĐÁNH GIÁ CHẤT LƯỢNG BỮA ĂN\n━━━━━━━━━━━━━━\n• Bữa ăn: ' + meal + '\n• Chất lượng: ' + rateInfo + '\n• Thời gian: ' + timeStr + '\n• Số ảnh: ' + resizedImages.length + '\n━━━━━━━━━━━━━━\nNỘI DUNG GÓP Ý:\n' + rawComment;
+
+    try {
+      const res = await fetch(PROXY_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: JSON.stringify({
+          action: 'submitEvaluation',
+          chatId: rec.id,
+          text: fullText,
+          rawComment: rawComment,
+          images: resizedImages,
+          meal: meal,
+          rating: rating,
+          rate: rateInfo,
+          recipient: rec.name,
+          time: timeStr
+        })
+      });
+      const result = await res.json();
+      
+      if (result.ok) {
+        markDone(meal);
+        localStorage.removeItem('eval_draft');
+        let thankMsg = rating >= 4 ? 'Cảm ơn bạn! Nhà bếp rất vui vì bạn thấy ngon miệng!' : 'Nhà bếp xin ghi nhận góp ý và sẽ cố gắng khắc phục!';
+        
+        $('thankyouText').textContent = thankMsg;
+        $('thankyouOverlay').classList.add('show');
+        setTimeout(() => { $('thankyouOverlay').classList.remove('show'); }, 5000);
+
+        $('receiptTitle').textContent = '✅ Đã gửi thành công!';
+        $('thankYouMsg').textContent = thankMsg;
+        $('rName').textContent = rec.name;
+        $('rTime').textContent = timeStr;
+        $('rMeal').textContent = meal;
+        $('rRate').textContent = rateInfo;
+        $('rImages').textContent = resizedImages.length + ' ảnh';
+        $('receipt').hidden = false; 
+        
+        if (result.zaloSuccess === 0) {
+          showToast('⚠️ Đã lưu vào hệ thống nhưng thông báo Zalo đang chậm.', true);
+        }
+
+        form.reset();
+        chips.forEach((c, i) => c.classList.toggle('active', i === 0));
+        rating = 0;
+        starBtns.forEach(b => b.classList.remove('on'));
+        rateNote.textContent = 'Chạm vào sao để chấm điểm';
+        rateNote.style.color = 'var(--muted)';
+        $('charCount').textContent = '0';
+        images.length = 0;
+        renderPreview();
+        imageInput.value = '';
+        selectedTags.clear();
+        document.querySelectorAll('#quickTags .tag').forEach(el => el.classList.remove('active'));
+        idHint.innerHTML = 'Bấm chọn để xác định mã người nhận';
+
+      } else { 
+        if (result.log && result.log.length > 0) {
+          showToast('❌ Lỗi: ' + result.log.join(' | '), true); 
+        } else {
+          showToast('❌ Lỗi: ' + (result.error || 'Không rõ nguyên nhân'), true); 
+        }
+      } 
+    } catch (error) { 
+      showToast('❌ ' + error.message, true); 
+    } finally { 
+      submitBtn.disabled = false;
+      submitBtn.textContent = '📨 Gửi đánh giá'; 
+    }
+  });
+
+  /* ADMIN & PREVIEW LOGIC */
+  const adminModal = $('adminModal');
+  const previewOverlay = $('previewOverlay');
+  let cachedReportBlob = null;
+  let cachedReportObjectURL = null;
+  let currentAdminPassword = ''; 
+
+  $('adminTrigger').addEventListener('click', () => {
+    adminModal.classList.add('show');
+    document.body.classList.add('no-scroll');
+    $('adminPwd').focus();
+  });
+  $('closeAdminModal').addEventListener('click', () => {
+    adminModal.classList.remove('show');
+    document.body.classList.remove('no-scroll');
+  });
+
+  async function fetchReportData(btnToAnimate) {
+    const pwd = $('adminPwd').value.trim();
+    if (!pwd) { showToast('Nhập mật khẩu!', true); return false; }
+    currentAdminPassword = pwd; 
+
+    const payload = {
+      action: 'admin-download',
+      password: currentAdminPassword,
+      fromDate: $('fromDate').value,
+      toDate: $('toDate').value,
+      meal: $('filterMeal').value,
+      rating: $('filterRating').value
+    };
+
+    let originalText = '';
+    if (btnToAnimate) {
+      btnToAnimate.disabled = true;
+      originalText = btnToAnimate.textContent;
+      btnToAnimate.textContent = '⏳ Đang tải...';
+    }
+
+    try {
+      const res = await fetch(PROXY_URL, { 
+        method: 'POST', 
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' }, 
+        body: JSON.stringify(payload) 
+      });
+      const data = await res.json();
+      if (!data.ok) throw new Error(data.error);
+      
+      if (cachedReportObjectURL) URL.revokeObjectURL(cachedReportObjectURL);
+      cachedReportBlob = new Blob([data.html], { type: 'text/html;charset=utf-8' });
+      cachedReportObjectURL = URL.createObjectURL(cachedReportBlob);
+
+      $('previewFrame').src = cachedReportObjectURL;
+      $('previewTitle').textContent = '📊 Tổng hợp (' + data.count + ')';
+      return true;
+    } catch (e) {
+      showToast('❌ ' + e.message, true);
+      return false;
+    } finally {
+      if (btnToAnimate) {
+        btnToAnimate.disabled = false;
+        btnToAnimate.textContent = originalText;
+      }
+    }
+  }
+
+  $('adminPreviewBtn').addEventListener('click', async function () {
+    const success = await fetchReportData(this);
+    if (success) {
+      adminModal.classList.remove('show'); 
+      previewOverlay.classList.add('show');
+    }
+  });
+
+  $('applyFilterBtn').addEventListener('click', async function () {
+    await fetchReportData(this);
+  });
+
+  $('closePreview').addEventListener('click', () => {
+    previewOverlay.classList.remove('show'); 
+    $('previewFrame').src = 'about:blank';
+    if (cachedReportObjectURL) URL.revokeObjectURL(cachedReportObjectURL);
+    adminModal.classList.add('show');
+  });
+
+  function downloadBlob(blob, ext) {
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `bao-cao_${Date.now()}.${ext}`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    setTimeout(() => URL.revokeObjectURL(url), 1500);
+  }
+
+  $('downloadFromPreview').addEventListener('click', () => {
+    if (cachedReportBlob) { 
+      downloadBlob(cachedReportBlob, 'html'); 
+      showToast('✅ Đã lưu file HTML'); 
+    } else {
+      showToast('Chưa có dữ liệu để tải!', true);
+    }
+  });
+
+  $('csvFromPreview').addEventListener('click', async function () {
+    if (!currentAdminPassword) return showToast('Lỗi xác thực, vui lòng đóng và đăng nhập lại!', true);
+    const btn = this; 
+    const originalText = btn.innerHTML;
+    btn.disabled = true;
+    btn.innerHTML = '⏳...';
+    
+    try {
+      const payload = { 
+        action: 'admin-download-csv', 
+        password: currentAdminPassword, 
+        fromDate: $('fromDate').value, 
+        toDate: $('toDate').value, 
+        meal: $('filterMeal').value,
+        rating: $('filterRating').value
+      };
+      const res = await fetch(PROXY_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: JSON.stringify(payload)
+      });
+      const data = await res.json();
+      if (!data.ok) throw new Error(data.error);
+      downloadBlob(new Blob([data.csv], { type: 'text/csv;charset=utf-8' }), 'csv');
+      showToast('✅ Đã tải Excel (CSV)');
+    } catch (e) {
+      showToast('❌ ' + e.message, true);
+    } finally {
+      btn.disabled = false;
+      btn.innerHTML = originalText;
+    }
+  });
+
+  $('testZaloFromPreview').addEventListener('click', async function () {
+    if (!currentAdminPassword) return showToast('Lỗi xác thực, vui lòng đóng và đăng nhập lại!', true);
+    const btn = this; 
+    const originalText = btn.innerHTML;
+    btn.disabled = true;
+    btn.innerHTML = '⏳...';
+    
+    try {
+      const res = await fetch(PROXY_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: JSON.stringify({ action: 'test-zalo', password: currentAdminPassword })
+      });
+      const data = await res.json();
+      if (data.ok) {
+        let msg = 'KẾT QUẢ TEST ZALO\n\n';
+        for (const k in data.results) {
+          msg += '• ' + k.toUpperCase() + ': ' + (data.results[k].code ? 'OK (' + data.results[k].code + ')' : 'LỖI') + '\n';
+        }
+        alert(msg);
+      } else {
+        showToast('❌ ' + data.error, true);
+      }
+    } catch (e) {
+      showToast('❌ Lỗi kết nối', true);
+    } finally {
+      btn.disabled = false;
+      btn.innerHTML = originalText;
+    }
+  });
+
+  document.getElementById('thankyouOverlay').addEventListener('click', function(e) {
+    if (e.target === this) { this.classList.remove('show'); }
+  });
+})();
+</script>
+</body>
+</html>
